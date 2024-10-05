@@ -8,7 +8,7 @@
 <body>
     <h2>Airport Shop Closing Time</h2>
 
-    <label for="lastFlightTime">Insert Last Fight Time:</label>
+    <label for="lastFlightTime">Insert Last Flight Time:</label>
     <input type="time" id="lastFlightTime" value="01:30">
 
     <button onclick="generateMessage()">Generate</button>
@@ -21,20 +21,24 @@
         function timeStringToDate(timeString) {
             const [hours, minutes] = timeString.split(':').map(Number);
             const now = new Date();
-            now.setHours(hours);
-            now.setMinutes(minutes);
+            now.setHours(hours, minutes, 0, 0); // 设置小时和分钟
             return now;
         }
 
         // 函数用于将Date对象转换回时间字符串
         function dateToTimeString(date) {
-            const hours = date.getHours().toString().padStart(2, '0');
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            return `${hours}:${minutes}`;  // 使用模板字符串并且用反引号
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes}`;
         }
 
         function generateMessage() {
             const lastFlightTime = document.getElementById("lastFlightTime").value;
+
+            if (!lastFlightTime) {
+                alert("Please enter the last flight time!");
+                return;
+            }
 
             // 将输入的时间转换为Date对象
             const lastFlightDate = timeStringToDate(lastFlightTime);
@@ -63,13 +67,15 @@ PERHATIAN: TIDAK boleh tutup kedai sebelum masa yang di tetap kan. Tq`;
         // 复制文本函数
         function copyText() {
             const text = document.getElementById("outputMessage").innerText;
-            const tempInput = document.createElement("textarea");
-            tempInput.value = text;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand("copy");
-            document.body.removeChild(tempInput);
-            alert("文本已复制！");
+            if (!text) {
+                alert("No text to copy!");
+                return;
+            }
+            navigator.clipboard.writeText(text).then(() => {
+                alert("Text copied!");
+            }).catch(() => {
+                alert("Failed to copy text!");
+            });
         }
     </script>
 
