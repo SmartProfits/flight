@@ -1,83 +1,117 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>每日信息生成器</title>
+    <title>Dynamic Time Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        label, button {
+            display: block;
+            margin-bottom: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border: 1px solid #ccc;
+        }
+    </style>
 </head>
 <body>
-    <h2>Airport Shop Closing Time</h2>
 
-    <label for="lastFlightTime">Insert Last Flight Time:</label>
-    <input type="time" id="lastFlightTime" value="01:30">
+<div class="container">
+    <h2>Dynamic Shop Closing Times</h2>
+    <label for="time">Enter Last Flight Time (24-hour format, HH:MM):</label>
+    <input type="time" id="time" />
 
-    <button onclick="generateMessage()">Generate</button>
-    <button onclick="copyText()">Copy</button>
+    <button onclick="generateText()">Generate Text</button>
 
-    <p id="outputMessage" style="white-space: pre-wrap;"></p>
+    <div class="result" id="result">
+        <!-- Generated text will appear here -->
+    </div>
 
-    <script>
-        // 函数用于将时间格式（HH:MM）转为Date对象
-        function timeStringToDate(timeString) {
-            const [hours, minutes] = timeString.split(':').map(Number);
-            const now = new Date();
-            now.setHours(hours, minutes, 0, 0); // 设置小时和分钟
-            return now;
+    <button onclick="copyText()">Copy Text</button>
+</div>
+
+<script>
+    // Function to format time into "pagi" or "malam"
+    function formatTime(hours, minutes) {
+        let formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes} `;
+        
+        if (hours < 12) {
+            formattedTime += "pagi";
+        } else {
+            formattedTime += "malam";
         }
 
-        // 函数用于将Date对象转换回时间字符串
-        function dateToTimeString(date) {
-            const hours = String(date.getHours()).padStart(2, '0');
-            const minutes = String(date.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`;
+        return formattedTime;
+    }
+
+    // Function to generate the dynamic text
+    function generateText() {
+        const inputTime = document.getElementById('time').value;
+        
+        if (!inputTime) {
+            alert("Please enter a valid time!");
+            return;
         }
 
-        function generateMessage() {
-            const lastFlightTime = document.getElementById("lastFlightTime").value;
+        // Get current date in the format DD/MM/YYYY
+        const currentDate = new Date().toLocaleDateString('en-GB');
 
-            if (!lastFlightTime) {
-                alert("Please enter the last flight time!");
-                return;
-            }
+        // Extract hours and minutes from the input time
+        const [hours, minutes] = inputTime.split(':').map(Number);
 
-            // 将输入的时间转换为Date对象
-            const lastFlightDate = timeStringToDate(lastFlightTime);
+        // Convert to Date object for manipulation
+        const baseTime = new Date();
+        baseTime.setHours(hours, minutes);
 
-            // 计算每个时间
-            const tomClosingTime = new Date(lastFlightDate.getTime() - 60 * 60 * 1000); // -1小时
-            const oleClosingTime = new Date(lastFlightDate.getTime() - 30 * 60 * 1000); // -30分钟
+        // Time calculations
+        const timeTom = new Date(baseTime);
+        timeTom.setMinutes(baseTime.getMinutes() - 60); // TOM shop closes 1 hour before
 
-            // 生成日期
-            const currentDate = new Date();
-            const formattedDate = currentDate.toLocaleDateString('zh-Hans-CN'); // 格式为 YYYY/MM/DD
+        const timeOle = new Date(baseTime);
+        timeOle.setMinutes(baseTime.getMinutes() - 30); // OLE OLE shop closes 30 mins before
 
-            // 生成输出信息
-            const message = `
-Hari ini ${formattedDate} last flight jam ${dateToTimeString(lastFlightDate)} pagi. 
-Kedai TOM tutup jam ${dateToTimeString(tomClosingTime)} pagi, 
-kedai TAMOI, WRAPPING AA & MAS tutup jam 12.00 pagi, 
-kedai dalam KTSP dan JKL tutup jam 10.00 malam, 
-dan Kedai OLE OLE tutup jam ${dateToTimeString(oleClosingTime)} pagi. 
-Kedai LL buka 24 jam. 
-PERHATIAN: TIDAK boleh tutup kedai sebelum masa yang di tetap kan. Tq`;
+        // Generate text
+        const resultText = `
+            Hari ini ${currentDate} last flight jam ${formatTime(hours, minutes)}. 
+            Kedai TOM tutup jam ${formatTime(timeTom.getHours(), timeTom.getMinutes())}, 
+            kedai TAMOI, WRAPPING AA & MAS tutup jam 12.00 pagi, 
+            kedai dalam KTSP dan JKL tutup jam 10.00 malam dan 
+            Kedai OLE OLE tutup jam ${formatTime(timeOle.getHours(), timeOle.getMinutes())}. 
+            Kedai LL buka 24 jam. 
+            PERHATIAN : TIDAK boleh tutup kedai sebelum masa yang di tetap kan. Tq
+        `;
 
-            document.getElementById("outputMessage").innerText = message;
+        // Display the generated text
+        document.getElementById('result').innerText = resultText.trim();
+    }
+
+    // Function to copy the generated text
+    function copyText() {
+        const result = document.getElementById('result').innerText;
+        if (!result) {
+            alert("No text to copy! Please generate the text first.");
+            return;
         }
 
-        // 复制文本函数
-        function copyText() {
-            const text = document.getElementById("outputMessage").innerText;
-            if (!text) {
-                alert("No text to copy!");
-                return;
-            }
-            navigator.clipboard.writeText(text).then(() => {
-                alert("Text copied!");
-            }).catch(() => {
-                alert("Failed to copy text!");
-            });
-        }
-    </script>
+        // Copy text to clipboard
+        navigator.clipboard.writeText(result).then(() => {
+            alert("Text copied to clipboard!");
+        }).catch(err => {
+            alert("Failed to copy text.");
+        });
+    }
+</script>
 
 </body>
 </html>
