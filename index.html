@@ -42,17 +42,13 @@
 </div>
 
 <script>
-    // Function to format time into "pagi" or "malam"
+    // Function to format time into 12-hour format with AM/PM
     function formatTime(hours, minutes) {
-        let formattedTime = `${hours}:${minutes < 10 ? '0' + minutes : minutes} `;
-        
-        if (hours < 12) {
-            formattedTime += "pagi";
-        } else {
-            formattedTime += "malam";
-        }
+        let period = hours >= 12 ? 'PM' : 'AM';
+        let formattedHours = hours % 12 || 12; // Convert to 12-hour format, '0' becomes '12'
+        let formattedMinutes = minutes < 10 ? '0' + minutes : minutes;
 
-        return formattedTime;
+        return `${formattedHours}:${formattedMinutes} ${period}`;
     }
 
     // Function to generate the dynamic text
@@ -85,8 +81,8 @@
         const resultText = `
             Hari ini ${currentDate} last flight jam ${formatTime(hours, minutes)}. 
             Kedai TOM tutup jam ${formatTime(timeTom.getHours(), timeTom.getMinutes())}, 
-            kedai TAMOI, WRAPPING AA & MAS tutup jam 12.00 pagi, 
-            kedai dalam KTSP dan JKL tutup jam 10.00 malam dan 
+            kedai TAMOI, WRAPPING AA & MAS tutup jam 12:00 AM, 
+            kedai dalam KTSP dan JKL tutup jam 10:00 PM dan 
             Kedai OLE OLE tutup jam ${formatTime(timeOle.getHours(), timeOle.getMinutes())}. 
             Kedai LL buka 24 jam. 
             PERHATIAN : TIDAK boleh tutup kedai sebelum masa yang di tetap kan. Tq
