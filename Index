@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日信息生成器</title>
+</head>
+<body>
+    <h2>每日信息生成器</h2>
+
+    <label for="lastFlightTime">请输入最后航班时间（24小时制，格式如13:30）:</label>
+    <input type="time" id="lastFlightTime" value="01:30">
+
+    <button onclick="generateMessage()">生成信息</button>
+    <button onclick="copyText()">复制文本</button>
+
+    <p id="outputMessage" style="white-space: pre-wrap;"></p>
+
+    <script>
+        // 函数用于将时间格式（HH:MM）转为Date对象
+        function timeStringToDate(timeString) {
+            const [hours, minutes] = timeString.split(':').map(Number);
+            const now = new Date();
+            now.setHours(hours);
+            now.setMinutes(minutes);
+            return now;
+        }
+
+        // 函数用于将Date对象转换回时间字符串
+        function dateToTimeString(date) {
+            const hours = date.getHours().toString().padStart(2, '0');
+            const minutes = date.getMinutes().toString().padStart(2, '0');
+            return `${hours}:${minutes}`;
+        }
+
+        function generateMessage() {
+            const lastFlightTime = document.getElementById("lastFlightTime").value;
+
+            // 将输入的时间转换为Date对象
+            const lastFlightDate = timeStringToDate(lastFlightTime);
+
+            // 计算每个时间
+            const tomClosingTime = new Date(lastFlightDate.getTime() - 60 * 60 * 1000); // -1小时
+            const oleClosingTime = new Date(lastFlightDate.getTime() - 30 * 60 * 1000); // -30分钟
+
+            // 生成日期
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleDateString('zh-Hans-CN'); // 格式为 YYYY/MM/DD
+
+            // 生成输出信息
+            const message = `
+Hari ini ${formattedDate} last flight jam ${dateToTimeString(lastFlightDate)} pagi. 
+Kedai TOM tutup jam ${dateToTimeString(tomClosingTime)} pagi, 
+kedai TAMOI, WRAPPING AA & MAS tutup jam 12.00 pagi, 
+kedai dalam KTSP dan JKL tutup jam 10.00 malam, 
+dan Kedai OLE OLE tutup jam ${dateToTimeString(oleClosingTime)} pagi. 
+Kedai LL buka 24 jam. 
+PERHATIAN: TIDAK boleh tutup kedai sebelum masa yang di tetap kan. Tq`;
+
+            document.getElementById("outputMessage").innerText = message;
+        }
+
+        // 复制文本函数
+        function copyText() {
+            const text = document.getElementById("outputMessage").innerText;
+            const tempInput = document.createElement("textarea");
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            document.execCommand("copy");
+            document.body.removeChild(tempInput);
+            alert("文本已复制！");
+        }
+    </script>
+
+</body>
+</html>
